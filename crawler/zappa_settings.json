@@ -1,0 +1,46 @@
+{
+  "crawler": {
+    "app_function": "app.handler",  
+    "aws_region": "us-east-1",
+    "profile_name": "default",
+    "project_name": "parcialc3",
+    "runtime": "python3.10",
+    "s3_bucket": "parcial3luis",
+    "keep_warm": false,
+    "apigateway_enabled": false, 
+    "manage_roles": false,
+    "role_name": "LabRole",
+    "events": [
+      {
+        "function": "app.handler",
+        "event_source": {
+          "arn": "arn:aws:s3:::parcial3luis",
+          "events": [
+            "s3:ObjectCreated:Put"
+          ],
+          "filter": {
+            "Key": {
+              "FilterRules": [
+                {
+                  "Name": "prefix",
+                  "Value": "headlines/final/"
+                },
+                {
+                  "Name": "suffix",
+                  "Value": ".csv"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "exclude": [
+      "boto3",
+      "botocore",
+      "dateutil",
+      "s3transfer",
+      "concurrent"
+    ]
+  }
+}

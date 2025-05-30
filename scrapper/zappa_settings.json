@@ -1,0 +1,28 @@
+{
+  "devInfo": {
+    "app_function": "app.handler",
+    "aws_region": "us-east-1",
+    "profile_name": "default",
+    "project_name": "parcialc3",
+    "runtime": "python3.10",
+    "s3_bucket": "parcial3luis",
+    "keep_warm": false,
+    "apigateway_enabled": false,
+    "manage_roles": false,
+    "role_name": "LabRole",
+    "events": [
+      {
+        "function": "app.handler",
+        "type": "schedule",
+        "expression": "rate(1 minute)"
+      }
+    ],
+    "exclude": [
+      "boto3",
+      "dateutil",
+      "botocore",
+      "s3transfer",
+      "concurrent"
+    ]
+  }
+}
