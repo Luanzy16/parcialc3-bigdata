@@ -14,7 +14,7 @@
       {
         "function": "app.handler",
         "type": "schedule",
-        "expression": "rate(1 minute)"
+        "expression": "rate(1 day)"
       }
     ],
     "exclude": [

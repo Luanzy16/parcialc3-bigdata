@@ -104,7 +104,7 @@ def extract_news_data(html_content, base_url, newspaper_name):
                             'link': link
                         })
                         processed_links.add(link)
-            
+                        
         main_section_cards = soup.find_all('div', class_='c-main-section__cards__item')
         for card_el_tiempo in main_section_cards: # Renombrada la variable card para evitar conflicto
             category = "Sin Categoría"
@@ -130,7 +130,7 @@ def extract_news_data(html_content, base_url, newspaper_name):
 
     elif newspaper_name == "elespectador":
         # --- Lógica de Extracción para El Espectador (Mejorada con más selectores) ---
-    
+        
         card_selectors = [
             "div.CardLayout-Container",
             "div.Card",
@@ -146,32 +146,32 @@ def extract_news_data(html_content, base_url, newspaper_name):
             "div.story-card",                    # Un patrón común para tarjetas de noticias
             "div.headline-card",                 # Otro patrón para tarjetas de titulares
             "section.main-content article",      # Artículos dentro de la sección principal de contenido
-            "div.section-body .row .col-md-4",    # Patrón común en diseños de cuadrícula
+            "div.section-body .row .col-md-4",   # Patrón común en diseños de cuadrícula
             "div.listing-item",                  # Elementos en listados de noticias
             "div.news-card"                      # Otro nombre común para tarjetas de noticias
         ]
-    
+        
         for selector in card_selectors:
             article_cards = soup.select(selector)
-    
+            
             for card in article_cards:
                 title = None
                 link = None
                 current_category_for_card = "Sin Categoría"
-    
+                
                 # --- Extraer Título y Enlace ---
                 # Prioridad 1: h2 con clases específicas (ej. Card-Title, Promo-title) conteniendo un <a>
                 title_tag_h2 = card.find('h2', class_=lambda c: c and ('Card-Title' in c or 'Promo-title' in c))
                 title_link_tag = None
                 if title_tag_h2:
                     title_link_tag = title_tag_h2.find('a', href=True)
-    
+                
                 # Prioridad 2: Cualquier h1, h2, h3, h4 que contenga un <a>
                 if not title_link_tag:
                     heading_tag = card.find(['h1', 'h2', 'h3', 'h4'])
                     if heading_tag:
                         title_link_tag = heading_tag.find('a', href=True)
-    
+                
                 # Prioridad 3: Para 'div.card-body' o contenedores similares, buscar enlaces principales
                 if not title_link_tag and ('card-body' in selector or 'container' in selector or 'item' in selector):
                     # Intentar encontrar el enlace principal que no sea un pie de página o de navegación
@@ -192,20 +192,20 @@ def extract_news_data(html_content, base_url, newspaper_name):
                             if link_candidate.get_text(strip=True) and not link_candidate.get_text(strip=True).isdigit():
                                 title_link_tag = link_candidate
                                 break
-    
-    
+                
+                
                 if title_link_tag:
                     title_text_candidate = title_link_tag.get_text(strip=True)
                     # Si el texto del enlace está vacío pero su padre h-tag tiene texto, usar el del padre
                     if not title_text_candidate and title_link_tag.parent and title_link_tag.parent.name.startswith(('h1', 'h2', 'h3', 'h4')):
                         title_text_candidate = title_link_tag.parent.get_text(strip=True)
-    
+                    
                     if title_text_candidate:
                         title = title_text_candidate
                         link_href = title_link_tag.get('href')
                         if link_href:
                             link = urljoin(base_url, link_href)
-    
+                
                 # --- Extraer Categoría ---
                 # Prioridad 1: Div contenedor de sección con h4 y enlace
                 section_container_div = card.find('div', class_='Card-SectionContainer')
@@ -217,7 +217,7 @@ def extract_news_data(html_content, base_url, newspaper_name):
                             category_text = category_a_tag.get_text(strip=True)
                             if category_text:
                                 current_category_for_card = category_text
-    
+                
                 # Prioridad 2: h4.Card-Section directo con enlace (si no se encontró por P1)
                 if current_category_for_card == "Sin Categoría":
                     direct_category_h4 = card.find('h4', class_='Card-Section')
@@ -227,7 +227,7 @@ def extract_news_data(html_content, base_url, newspaper_name):
                             category_text = category_a_tag.get_text(strip=True)
                             if category_text:
                                 current_category_for_card = category_text
-    
+                
                 # Prioridad 3: span.section-name (si no se encontró por P1 o P2)
                 if current_category_for_card == "Sin Categoría":
                     category_span_tag = card.find('span', class_='section-name')
@@ -235,7 +235,7 @@ def extract_news_data(html_content, base_url, newspaper_name):
                         category_text = category_span_tag.get_text(strip=True)
                         if category_text:
                             current_category_for_card = category_text
-    
+                
                 # Prioridad 4: atributo data-category en la tarjeta (si no se encontró antes)
                 if current_category_for_card == "Sin Categoría":
                     data_category_attr = card.get('data-category')
@@ -243,7 +243,7 @@ def extract_news_data(html_content, base_url, newspaper_name):
                         category_text = data_category_attr.strip()
                         if category_text and category_text != "Sin Categoría":
                             current_category_for_card = category_text
-    
+                
                 # Añadir a news_items si es válido y no duplicado
                 if title and link and link not in processed_links:
                     news_item = {
@@ -255,7 +255,7 @@ def extract_news_data(html_content, base_url, newspaper_name):
                     processed_links.add(link)
                     # Imprime cada noticia extraída
                     print(f"Noticia extraída: Categoría: '{news_item['category']}', Título: '{news_item['title']}', Enlace: '{news_item['link']}'")
-    
+            
         # Al finalizar la extracción para el periódico, imprime el total
         print(f"Número total de noticias extraídas para El Espectador: {len(news_items)}")
         
@@ -291,6 +291,7 @@ def handler(event, context):
                 if "eltiempo" in periodico_name_raw:
                     periodico = "eltiempo"
                     base_url = "https://www.eltiempo.com/"
+                    print(f"\nIniciando extracción para El Tiempo: {filename}") # Added for clarity
                 elif "elespectador" in periodico_name_raw:
                     periodico = "elespectador"
                     base_url = "https://www.elespectador.com/"
@@ -311,7 +312,8 @@ def handler(event, context):
 
                 csv_buffer = StringIO()
                 fieldnames = ['category', 'title', 'link']
-                writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames)
+                # *** CAMBIO AQUÍ: Usar delimiter='>' ***
+                writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames, delimiter='>') 
                 writer.writeheader()
                 for row in news_data:
                     writer.writerow(row)
@@ -361,17 +363,17 @@ if __name__ == '__main__':
     print(f"Ejecutando localmente la función Lambda de procesamiento, usando el bucket S3 real: {S3_BUCKET_NAME}...")
     
     current_date_str = datetime.now().strftime('%Y-%m-%d')
-    newspaper_to_test = "elespectador" 
     
-    #nombre_archivo_prueba = f"{newspaper_to_test}-{current_date_str}.html"
-    nombre_archivo_prueba = "elespectador-2025-05-30.html" # Using the specific file you provided
+    # --- Prueba para El Espectador ---
+    newspaper_to_test_elespectador = "elespectador"
+    nombre_archivo_prueba_elespectador = f"{newspaper_to_test_elespectador}-{current_date_str}.html"
+    s3_real_key_for_test_elespectador = f"{S3_RAW_PREFIX}/{nombre_archivo_prueba_elespectador}"
     
-    s3_real_key_for_test = f"{S3_RAW_PREFIX}/{nombre_archivo_prueba}" 
+    print(f"\n--- Iniciando prueba para {newspaper_to_test_elespectador.upper()} ---")
+    print(f"Intentando procesar el archivo de prueba: s3://{S3_BUCKET_NAME}/{s3_real_key_for_test_elespectador}")
+    print(f"Asegúrate de que '{nombre_archivo_prueba_elespectador}' exista en tu bucket S3 bajo '{S3_RAW_PREFIX}/'.")
 
-    print(f"Intentando procesar el archivo de prueba: s3://{S3_BUCKET_NAME}/{s3_real_key_for_test}")
-    print("Asegúrate de que este archivo exista en tu bucket S3 bajo esa ruta.")
-
-    test_event = {
+    test_event_elespectador = {
         "Records": [
             {
                 "eventVersion": "2.1",
@@ -381,22 +383,59 @@ if __name__ == '__main__':
                 "eventName": "ObjectCreated:Put",
                 "s3": {
                     "s3SchemaVersion": "1.0",
-                    "configurationId": "testConfigId",
+                    "configurationId": "testConfigIdElespectador",
                     "bucket": {
                         "name": S3_BUCKET_NAME, 
                         "arn": f"arn:aws:s3:::{S3_BUCKET_NAME}"
                     },
                     "object": {
-                        "key": s3_real_key_for_test, 
+                        "key": s3_real_key_for_test_elespectador, 
                         "size": 1024, 
-                        "eTag": "mock_etag_local_test",
-                        "sequencer": "mock_sequencer_local_test"
+                        "eTag": "mock_etag_elespectador",
+                        "sequencer": "mock_sequencer_elespectador"
                     }
                 }
             }
         ]
     }
+    handler(test_event_elespectador, None)
+    print(f"--- Prueba para {newspaper_to_test_elespectador.upper()} terminada ---")
+
+    # --- Prueba para El Tiempo ---
+    newspaper_to_test_eltiempo = "eltiempo"
+    nombre_archivo_prueba_eltiempo = f"{newspaper_to_test_eltiempo}-{current_date_str}.html"
+    s3_real_key_for_test_eltiempo = f"{S3_RAW_PREFIX}/{nombre_archivo_prueba_eltiempo}"
+
+    print(f"\n--- Iniciando prueba para {newspaper_to_test_eltiempo.upper()} ---")
+    print(f"Intentando procesar el archivo de prueba: s3://{S3_BUCKET_NAME}/{s3_real_key_for_test_eltiempo}")
+    print(f"Asegúrate de que '{nombre_archivo_prueba_eltiempo}' exista en tu bucket S3 bajo '{S3_RAW_PREFIX}/'.")
+
+    test_event_eltiempo = {
+        "Records": [
+            {
+                "eventVersion": "2.1",
+                "eventSource": "aws:s3",
+                "awsRegion": "sa-east-1", 
+                "eventTime": datetime.now().isoformat() + "Z",
+                "eventName": "ObjectCreated:Put",
+                "s3": {
+                    "s3SchemaVersion": "1.0",
+                    "configurationId": "testConfigIdEltiempo",
+                    "bucket": {
+                        "name": S3_BUCKET_NAME, 
+                        "arn": f"arn:aws:s3:::{S3_BUCKET_NAME}"
+                    },
+                    "object": {
+                        "key": s3_real_key_for_test_eltiempo, 
+                        "size": 1024, 
+                        "eTag": "mock_etag_eltiempo",
+                        "sequencer": "mock_sequencer_eltiempo"
+                    }
+                }
+            }
+        ]
+    }
+    handler(test_event_eltiempo, None)
+    print(f"--- Prueba para {newspaper_to_test_eltiempo.upper()} terminada ---")
     
-    handler(test_event, None)
-        
-    print("Ejecución local de la función de procesamiento terminada.")
+    print("\nEjecución local de la función de procesamiento completada.a")
