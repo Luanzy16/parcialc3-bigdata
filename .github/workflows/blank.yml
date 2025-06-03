@@ -57,15 +57,18 @@ jobs:
 
       - name: Deploy scraper with Zappa
         run: |
+          source env/bin/activate
           cd punto1
           zappa update devInfo
 
       - name: Deploy parser with Zappa
         run: |
+          source env/bin/activate
           cd punto2
           zappa update dev_csv
 
       - name: Deploy crawler with Zappa
         run: |
+          source env/bin/activate
           cd punto3
           zappa update crawler
