@@ -2,7 +2,6 @@
   "crawler": {
     "app_function": "app.handler",  
     "aws_region": "us-east-1",
-    "profile_name": "default",
     "project_name": "parcialc3",
     "runtime": "python3.10",
     "s3_bucket": "parcial3luis",
