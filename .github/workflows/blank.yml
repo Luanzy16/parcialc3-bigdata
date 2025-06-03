@@ -28,7 +28,7 @@ jobs:
           pip install pytest moto boto3
 
       - name: Ejecutar pruebas con pytest
-        run: PYTHONPATH=$(pwd) pytest test/
+        run: PYTHONPATH=$(pwd) pytest .
 
   deploy:
     name: Despliegue automático en AWS
@@ -36,10 +36,17 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@v3
+
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
+      - name: Instalar Zappa y boto3
+        run: |
+          python -m pip install --upgrade pip
+          pip install zappa boto3
+
       - name: Verificar credenciales AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -47,20 +54,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
-      - name: Desplegar lambda
-        run: |
-          # Crear y activar el entorno virtual
-          python -m venv venv
-          source venv/bin/activate
-          
-          # Instalar Zappa y boto3
-          pip install zappa boto3
-          
-          # Desplegar Lambda de Scraping
-          zappa update devInfo --settings_file punto1/zappa_settings.json
-          
-          # Desplegar Lambda de Procesamiento
-          zappa update dev_csv --settings_file punto2/zappa_settings.json
 
-          # Desplegar Lambda de crawler
-          zappa update dev_csv --settings_file punto3/zappa_settings.json
+      - name: Deploy scraper with Zappa
+        run: |
+          cd punto1
+          zappa update devInfo
+
+      - name: Deploy parser with Zappa
+        run: |
+          cd punto2
+          zappa update dev_csv
+
+      - name: Deploy crawler with Zappa
+        run: |
+          cd punto3
+          zappa update crawler
