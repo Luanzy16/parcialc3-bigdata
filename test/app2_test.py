@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from app import (
+from punto2.app import (
     extract_news_data,
     upload_to_s3,
     download_from_s3,
@@ -43,7 +43,7 @@ def test_extract_news_data_elespectador():
     assert result[0]['title'] == "Título Espectador"
     assert result[0]['link'] == "https://www.elespectador.com/articulo-espectador.html"
 
-@patch('app.get_s3_client')
+@patch('punto2.app.get_s3_client')
 def test_upload_to_s3(mock_get_s3_client):
     # Simula el cliente y su método put_object
     mock_s3 = MagicMock()
@@ -54,7 +54,7 @@ def test_upload_to_s3(mock_get_s3_client):
     assert result is True
     mock_s3.put_object.assert_called_once()
 
-@patch('app.get_s3_client')
+@patch('punto2.app.get_s3_client')
 def test_download_from_s3(mock_get_s3_client):
     mock_s3 = MagicMock()
     mock_get_s3_client.return_value = mock_s3
