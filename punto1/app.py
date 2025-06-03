@@ -5,10 +5,12 @@ from datetime import datetime
 # --- Configuración S3 ---
 S3_BUCKET_NAME = "parcial3luis" # ¡CAMBIA ESTO por tu bucket real!
 S3_PREFIX = "headlines/raw" # Prefijo para la estructura de carpetas en S3
-s3 = boto3.client('s3')
+
 
 def upload_to_s3(file_content, object_name):
     """Sube el contenido de la página a S3."""
+    
+    s3 = boto3.client('s3')
     try:
         s3.put_object(Bucket=S3_BUCKET_NAME, Key=object_name, Body=file_content, ContentType='text/html')
         print(f"Archivo subido a S3: s3://{S3_BUCKET_NAME}/{object_name}")
