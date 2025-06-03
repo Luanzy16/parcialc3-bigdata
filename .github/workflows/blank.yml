@@ -28,7 +28,7 @@ jobs:
           pip install pytest moto boto3
 
       - name: Ejecutar pruebas con pytest
-        run: PYTHONPATH=$(pwd) pytest punto1/app_test.py punto2/app_test.py punto3/app_test.py
+        run: PYTHONPATH=$(pwd) pytest punto1/app_test.py test
 
   deploy:
     name: Despliegue automático en AWS
